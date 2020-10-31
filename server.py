@@ -1,33 +1,33 @@
+##Python codes to do server-side part of chat room.
+import _thread
 import socket
-import sys
-import time
-
-## end of imports ###
-
-### init ###
-
-s = socket.socket()
-host = socket.gethostname()
-print(" server will start on host : ", host)
-port = 5555
+import threading
+"""AF_INET is the address domain of the 
+socket. This is used when we have an Internet Domain with 
+any two hosts The 2nd context of the code is the type of socket. """
+s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)  
+s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+# piece of code to allow IP address & Port
+host="127.0.0.2"
+port=5000
 s.bind((host,port))
-print("")
-print(" Server done binding to host and port successfully")
-print("")
-print("Server is waiting for incoming connections")
-print("")
-s.listen(1)
-conn, addr = s.accept()
-print(addr, " Has connected to the server and is now online ...")
-print("")
-while 1:
-            message = input(str(">> "))
-            message = message.encode()
-            conn.send(message)
-            print("message has been sent...")
-            print("")
-            incoming_message = conn.recv(1024)
-            incoming_message = incoming_message.decode()
-            print(" Client : ", incoming_message)
-            print("")
-
+s.listen(5)
+clients=[]
+#code to allow users to send messages
+def connectNewClient(c):
+     while True:
+        global clients
+        msg = c.recv(2048)
+        msg ='Online ('+str(clients.index(c)+1)+'):  '+msg.decode('ascii')
+        sendToAll(msg,c)
+def sendToAll(msg,con):
+    for client in clients:
+        client.send(msg.encode('ascii')) 
+        
+while True:
+    c,ad=s.accept()
+    # Display message when user connects
+    print('*Server Connected ')
+    clients.append(c)
+    c.send(('Online ('+str(clients.index(c)+1)+')').encode('ascii'))
+    _thread.start_new_thread(connectNewClient,(c,))
