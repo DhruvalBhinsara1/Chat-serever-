@@ -1,1 +1,1 @@
-If you would like to use this pleas open the server programme first
+If you would like to use this please open the server programme first
